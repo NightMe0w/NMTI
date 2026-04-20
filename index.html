@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NMTI：16型牛马生存图鉴</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 25%, #252a41 50%, #16213e 75%, #0f0c29 100%);
+    background-attachment: fixed;
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 20% 50%, rgba(233,69,96,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(245,166,35,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(80,250,123,0.04) 0%, transparent 50%);
+    z-index: -1;
+    animation: bgFloat 20s ease-in-out infinite;
+}
+
+@keyframes bgFloat {
+    0%, 100% { transform: translate(0, 0); }
+    33% { transform: translate(2%, -1%); }
+    66% { transform: translate(-1%, 2%); }
+}
+
+#progress-bar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: rgba(255,255,255,0.1);
+    z-index: 1000;
+    display: none;
+}
+
+#progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #e94560, #f5a623, #50fa7b);
+    transition: width 0.4s ease;
+    border-radius: 0 3px 3px 0;
+}
+
+.section {
+    display: none;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.section.active {
+    display: block;
+}
+
+#intro {
+    text-align: center;
+    padding-top: 60px;
+}
+
+#intro h1 {
+    font-size: 2.2em;
+    color: #f5a623;
+    margin-bottom: 30px;
+    text-shadow: 0 0 20px rgba(245,166,35,0.3);
+    letter-spacing: 2px;
+}
+
+#intro .intro-video {
+    margin: 30px auto;
+    max-width: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+#intro .intro-video video {
+    width: 100%;
+    display: block;
+}
+
+#intro .intro-text {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: 16px;
+    padding: 30px;
+    margin: 30px 0;
+    line-height: 2;
+    font-size: 1.05em;
+    color: #ccc;
+    text-align: left;
+}
+
+.start-btn {
+    display: inline-block;
+    padding: 16px 60px;
+    font-size: 1.3em;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, #f5a623, #e94560);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 3px;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.start-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(245,166,35,0.4);
+}
+
+.question-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+}
+
+.question-card:hover {
+    border-color: rgba(245,166,35,0.3);
+}
+
+.question-card .q-number {
+    display: inline-block;
+    background: linear-gradient(135deg, #e94560, #f5a623);
+    color: #1a1a2e;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-right: 10px;
+}
+
+.question-card .q-text {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 18px;
+    color: #f0f0f0;
+}
+
+.question-card .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.question-card .option {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    line-height: 1.5;
+}
+
+.question-card .option:hover {
+    background: rgba(245,166,35,0.1);
+    border-color: rgba(245,166,35,0.3);
+}
+
+.question-card .option.selected {
+    background: rgba(245,166,35,0.15);
+    border-color: #f5a623;
+    color: #f5a623;
+}
+
+.question-card .option .opt-label {
+    display: inline-block;
+    min-width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    margin-right: 12px;
+    font-weight: bold;
+    font-size: 0.85em;
+    flex-shrink: 0;
+}
+
+.question-card .option.selected .opt-label {
+    background: #f5a623;
+    color: #1a1a2e;
+}
+
+.submit-area {
+    text-align: center;
+    padding: 40px 0 60px;
+}
+
+.submit-btn {
+    padding: 14px 50px;
+    font-size: 1.15em;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, #50fa7b, #00b894);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(80,250,123,0.4);
+}
+
+.submit-btn:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+#result {
+    text-align: center;
+    padding-top: 50px;
+}
+
+.result-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 20px;
+    padding: 40px 30px;
+    margin: 20px 0;
+}
+
+.result-code {
+    font-size: 3em;
+    font-weight: bold;
+    letter-spacing: 12px;
+    background: linear-gradient(135deg, #e94560, #f5a623);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+}
+
+.result-name {
+    font-size: 2em;
+    color: #f5a623;
+    margin-bottom: 20px;
+}
+
+.result-image {
+    max-width: 300px;
+    max-height: 400px;
+    margin: 20px auto;
+    border-radius: 12px;
+    display: block;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.result-judgment {
+    text-align: left;
+    line-height: 2;
+    color: #ccc;
+    font-size: 1.05em;
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+}
+
+.extra-options {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.extra-btn {
+    padding: 12px 30px;
+    font-size: 1em;
+    color: #e0e0e0;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.extra-btn:hover {
+    background: rgba(245,166,35,0.15);
+    border-color: #f5a623;
+    color: #f5a623;
+}
+
+#dimension-analysis {
+    padding-top: 50px;
+}
+
+#dimension-analysis h2 {
+    text-align: center;
+    font-size: 1.8em;
+    color: #f5a623;
+    margin-bottom: 30px;
+}
+
+.dim-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.dim-card h3 {
+    color: #f5a623;
+    margin-bottom: 12px;
+    font-size: 1.2em;
+}
+
+.dim-card p {
+    line-height: 1.8;
+    color: #ccc;
+}
+
+.dim-card .dim-vs {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 15px 0;
+}
+
+.dim-card .dim-side {
+    flex: 1;
+    text-align: center;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.dim-card .dim-side.left {
+    background: rgba(233,69,96,0.15);
+    border: 1px solid rgba(233,69,96,0.3);
+}
+
+.dim-card .dim-side.right {
+    background: rgba(80,250,123,0.15);
+    border: 1px solid rgba(80,250,123,0.3);
+}
+
+.dim-card .dim-side .dim-letter {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.dim-card .dim-side.left .dim-letter {
+    color: #e94560;
+}
+
+.dim-card .dim-side.right .dim-letter {
+    color: #50fa7b;
+}
+
+.dim-card .dim-side .dim-label {
+    font-size: 1.1em;
+    margin-top: 5px;
+}
+
+#shadow-gallery {
+    padding-top: 50px;
+}
+
+#shadow-gallery h2 {
+    text-align: center;
+    font-size: 1.8em;
+    color: #f5a623;
+    margin-bottom: 30px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.gallery-item {
+    aspect-ratio: 1;
+    perspective: 1000px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover {
+    transform: scale(1.05);
+}
+
+.gallery-item-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s ease;
+    transform-style: preserve-3d;
+}
+
+.gallery-item.flipped .gallery-item-inner {
+    transform: rotateY(180deg);
+}
+
+.gallery-item-front, .gallery-item-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+}
+
+.gallery-item:hover .gallery-item-front,
+.gallery-item:hover .gallery-item-back {
+    border-color: rgba(245,166,35,0.4);
+}
+
+.gallery-item-back {
+    transform: rotateY(180deg);
+}
+
+.gallery-item-front img {
+    max-width: 85%;
+    max-height: 70%;
+    object-fit: contain;
+    filter: brightness(0.3) contrast(2);
+}
+
+.gallery-item-back img {
+    max-width: 85%;
+    max-height: 70%;
+    object-fit: contain;
+}
+
+.gallery-question {
+    font-size: 1.2em;
+    color: #f5a623;
+    margin-top: 8px;
+    letter-spacing: 4px;
+}
+
+.gallery-name {
+    font-size: 1.2em;
+    color: #f5a623;
+    margin-top: 8px;
+}
+
+#author-message {
+    padding-top: 50px;
+}
+
+.author-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 30px;
+    line-height: 2;
+    color: #aaa;
+    font-size: 0.95em;
+}
+
+.author-card .author-title {
+    color: #f5a623;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.author-card a {
+    color: #5dade2;
+    text-decoration: none;
+}
+
+.author-card a:hover {
+    text-decoration: underline;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 8px 24px;
+    color: #aaa;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+}
+
+.back-btn:hover {
+    color: #f5a623;
+    border-color: rgba(245,166,35,0.3);
+}
+
+.unanswered-warning {
+    color: #e94560;
+    margin-top: 15px;
+    font-size: 0.95em;
+    display: none;
+}
+
+@media (max-width: 600px) {
+    #intro h1 {
+        font-size: 1.5em;
+    }
+    .result-code {
+        font-size: 2.2em;
+    }
+    .result-name {
+        font-size: 1.5em;
+    }
+    .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .question-card {
+        padding: 20px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar-container">
+    <div id="progress-bar"></div>
+</div>
+
+<div id="intro" class="section active">
+    <h1>《NMTI：16型牛马生存图鉴》</h1>
+    <div class="intro-video">
+        <video autoplay loop muted playsinline>
+            <source src="走牛灯.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="intro-text">
+        世界是一个巨大的草台班子，而我们都是在里面随地大小疯的天选牛马。<br><br>
+        有人内卷到发光，有人躺平到长蘑菇；有人在社交场上长袖善舞，有人在工位上阴暗爬行。
+        这 28 道直击灵魂的拷问，不测你的智商，也不看你的银行卡余额，
+        只扒开你那被 DDL 和早八折磨出的精神底色。<br><br>
+        抛开那些刻板的标签，请凭你最真实的直觉作答。
+        准备好直面你灵魂深处的牛角了吗？点击开始，启动你的专属进化！<br><br>
+        (亲测只需要大约3分钟就可以完成~)
+    </div>
+    <button class="start-btn" onclick="startQuiz()">开始测试</button>
+</div>
+
+<div id="quiz" class="section">
+    <div id="questions-container"></div>
+    <div class="submit-area">
+        <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">提交</button>
+        <div class="unanswered-warning" id="unanswered-warning">还有题目未作答，请检查后再提交！</div>
+    </div>
+</div>
+
+<div id="result" class="section">
+    <div class="result-card">
+        <div class="result-code" id="result-code"></div>
+        <div class="result-name" id="result-name"></div>
+        <img class="result-image" id="result-image" src="" alt="">
+        <div class="result-judgment" id="result-judgment"></div>
+    </div>
+    <div class="extra-options">
+        <button class="extra-btn" onclick="showSection('dimension-analysis')">维度解析</button>
+        <button class="extra-btn" onclick="showSection('shadow-gallery')">牛格剪影</button>
+        <button class="extra-btn" onclick="resetQuiz()" style="background:rgba(233,69,96,0.15);border-color:rgba(233,69,96,0.4);color:#e94560;">重新测试</button>
+    </div>
+    <div class="author-card">
+        <div class="author-title">欢迎来到NMTI 鉴定中心！</div>
+        本测试纯属娱乐，主要目的是为了娱乐。代码是专业打螺丝的我(和Ai)敲的，
+        如果测出来的结果不准，或者觉得受到了冒犯多多海涵！<br><br>
+        另外，本测试的代码是开源的，如果你觉得好玩，可以自己修改部分题目分享给你的朋友们。<br>
+        目前统计功能尚未试装，请不要拷打作者！我在做了！！！<br><br>
+        感谢游玩，B站id：自闭的夜猫<br>
+        <a href="https://b23.tv/pxnz51y" target="_blank">https://b23.tv/pxnz51y</a><br><br>
+        彩蛋尚未全部实装，敬请期待……<br><br>
+        (不要被我导师发现，我这周还没干正经事(其实上周也没干))
+
+    </div>
+</div>
+
+<div id="dimension-analysis" class="section">
+    <h2>维度解析</h2>
+    <div class="dim-card">
+        <h3>1. 内驱力维度：卷 (J) vs 躺 (T)</h3>
+        <div class="dim-vs">
+            <div class="dim-side left">
+                <div class="dim-letter">J</div>
+                <div class="dim-label">卷</div>
+            </div>
+            <div class="dim-side right">
+                <div class="dim-letter">T</div>
+                <div class="dim-label">躺</div>
+            </div>
+        </div>
+        <p>衡量面对任务与压力的核心驱动力。“卷”代表积极进取、死磕到底的奋斗本能；“躺”代表拒绝内耗、顺水推舟、准点下班的松弛生存哲学。</p>
+    </div>
+    <div class="dim-card">
+        <h3>2. 社交度维度：显 (X) vs 隐 (Y)</h3>
+        <div class="dim-vs">
+            <div class="dim-side left">
+                <div class="dim-letter">X</div>
+                <div class="dim-label">显</div>
+            </div>
+            <div class="dim-side right">
+                <div class="dim-letter">Y</div>
+                <div class="dim-label">隐</div>
+            </div>
+        </div>
+        <p>衡量在群体中的能量释放方式。“显”渴望聚光灯与存在感，是天生的显眼包与气氛组；“隐”则享受小透明状态，屏蔽喧嚣，在自己的角落默默蓄力。</p>
+    </div>
+    <div class="dim-card">
+        <h3>3. 精神域维度：疯 (F) vs 稳 (W)</h3>
+        <div class="dim-vs">
+            <div class="dim-side left">
+                <div class="dim-letter">F</div>
+                <div class="dim-label">疯</div>
+            </div>
+            <div class="dim-side right">
+                <div class="dim-letter">W</div>
+                <div class="dim-label">稳</div>
+            </div>
+        </div>
+        <p>衡量面对突发状况与雷点时的情绪防线。“疯”代表红温易怒、激情开麦甚至发癫暴怒的真性情；“稳”则是泰山崩于前而面不改色，拥有水火不侵的极致钝感力。</p>
+    </div>
+    <div class="dim-card">
+        <h3>4. 思维域维度：实 (S) vs 抽 (C)</h3>
+        <div class="dim-vs">
+            <div class="dim-side left">
+                <div class="dim-letter">S</div>
+                <div class="dim-label">实</div>
+            </div>
+            <div class="dim-side right">
+                <div class="dim-letter">C</div>
+                <div class="dim-label">抽</div>
+            </div>
+        </div>
+        <p>衡量大脑处理信息的偏好。“实”聚焦现实利益、具体步骤与落地可行性，是绝对的务实派；“抽”则漫游于脑洞幻想、宏大叙事与赛博宇宙，是脱离地心引力的抽象大师。</p>
+    </div>
+    <div style="text-align:center">
+        <button class="back-btn" onclick="showSection('result')">返回结果</button>
+    </div>
+</div>
+
+<div id="shadow-gallery" class="section">
+    <h2>牛格剪影</h2>
+    <div class="gallery-grid" id="gallery-grid"></div>
+    <div style="text-align:center; margin-top:30px;">
+        <button class="back-btn" onclick="showSection('result')">返回结果</button>
+    </div>
+</div>
+
+<script>
+var questions = [
+    {q:"临下班 / 放学前10分钟，突然来了一个不紧急但稍微有点繁琐的任务：",opts:["叹口气，直接坐下开始干，今日事今日毕，弄完再走。","看一眼具体内容，把开头的部分做个框架，剩下的明天再说。","直接扔进收藏夹/备忘录，到点了立刻准时提包走人。","假装已经离开工位/没看到消息，主打一个已读不回。"]},
+    {q:"遇到必须几个人合作的\u201c小组作业 / 团队项目\u201d，有个队友疯狂摸鱼：",opts:["气得半死，但为了最终分数/绩效，熬夜把他的那份也完美做完。","私聊催促他，给他分配最简单不需要动脑子的活，自己盯紧点。","他摸我也摸，大家一起糊弄，最后能及格/交差就行。","直接摆烂摊牌，当场把他踢出小组，或者连自己的份也懒得干了。"]},
+    {q:"闹钟响了，外面在下暴雨，而今天必须去上学 / 上班：",opts:["一秒弹射起床，甚至比平时早出门10分钟以防堵车迟到。","在床上挣扎5分钟，还是咬牙起来洗漱，心情沉重地出门。","疯狂计算自己这个月的请假额度，纠结要不要发消息请假。","直接翻身继续睡，并在半梦半醒间编造一个绝妙的生病理由。"]},
+    {q:"提交完报告 / 卷子 / 表格后，突然发现里面有个错别字，但不影响整体阅读：",opts:["绝对不行！立刻撤回重发，如果有修改痕迹会难受一整天。","找机会悄悄修改一下源文件，祈祷别人没看到。","只要领导/老师没发现，就当这件事没发生过。","就算被指出来也毫无波澜：\u201c哦，打错字了，能看懂就行呗\u201d。"]},
+    {q:"难得有一个完全自由的周末，朋友叫你去参加一个\u201c据说能拓展人脉/学到东西\u201d的局：",opts:["立刻答应！多认识点人、多学点东西总没坏处。","犹豫一下，觉得如果去的人里有大佬，还是去混个脸熟吧。","找个借口推脱，周末的家才是最好的避风港。","直接拒绝：\u201c不去，好不容易休息，我只想躺着当一具尸体\u201d。"]},
+    {q:"刷短视频看到别人\u201c年纪轻轻月入十万\u201d或者\u201c同龄人考上顶尖名校\u201d：",opts:["瞬间焦虑拉满，立刻关掉视频去背单词/看专业书。","羡慕嫉妒恨，在心里暗暗发誓明天一定要早起努力。","点个赞，评论一句\u201c接好运\u201d，然后继续往下滑看搞笑视频。","毫无波澜，甚至觉得这都是剧本，还是手里的辣条香。"]},
+    {q:"领导 / 班主任画大饼：\u201c大家这段时间好好干，熬过这个阶段咱们就轻松了。\u201d",opts:["像打了鸡血一样，干劲十足地投入到当下的任务中。","虽然知道是饼，但为了年终奖/期末成绩，还是配合着努力一把。","左耳进右耳出，保持自己原有的划水节奏，绝不多干一点。","在心里翻个巨大的白眼，并在小群里吐槽这种千篇一律的话术。"]},
+    {q:"公司 / 班级集体大合照，大家开始排站位：",opts:["毫不犹豫地往第一排C位或者领导/老师旁边凑，争取最佳出镜率。","找一个能拍清楚脸的中间偏后位置，和关系好的朋友站在一起。","默默往后排边缘退，最好能被前面高个子挡住一半脸。","极其抗拒，假装系鞋带或者去上厕所，试图逃避这场合照。"]},
+    {q:"费了九牛二虎之力，终于搞定了一件很难的事（比如抢到绝版门票、通关高难游戏）：",opts:["立刻发九宫格朋友圈，配上夸张文案，尽情享受大家的点赞惊叹。","截图发到自己经常聊天的几个小群里，和熟人分享一下喜悦。","只把这件事告诉最好的1-2个朋友，甚至谁也不说。","自己在心里暗爽两分钟，然后毫无波澜地关掉屏幕去睡觉。"]},
+    {q:"走在路上，远远看到一个半生不熟的同学 / 同事迎面走来：",opts:["大老远就挥手大喊对方名字，走近了还要寒暄几句最近怎么样。","保持正常步速，等走近了微笑着点个头打个招呼。","立刻掏出手机假装在回重要消息，试图蒙混过关避免对视。","瞬间直角转弯走进旁边的便利店，宁可绕远路也绝对不要碰面。"]},
+    {q:"被拉进一个有几百人的大群（新生群 / 行业交流群），刚进群大家都在发欢迎：",opts:["顺势发一个极其惹眼的自我介绍名片，或者抛出话题引爆全场。","跟着大部队发一个中规中矩的\u201c谢谢大家，请多指教\u201d表情包。","一声不吭，假装没看到，并迅速开启群消息免打扰。","觉得太吵了，甚至想要立刻退群保平安。"]},
+    {q:"你的微信朋友圈 / 社交媒体主页目前的常态是：",opts:["几乎每天一更，自拍、美食、打卡、网易云emo，什么都发。","偶尔分享一下觉得特别有意思的生活碎片或者风景。","半年可见，发一条还得斟酌半天，甚至经常设为\u201c仅自己可见\u201d。","一条横线，或者几年没更新过了，仿佛一个僵尸号。"]},
+    {q:"在食堂 / 饭店吃饭，吃到一半发现菜里有一只小虫子：",opts:["立刻大声喊服务员过来，据理力争，要求免单或高额赔偿。","把服务员叫到跟前，小声指出问题，要求换一盘新的。","嫌交涉太麻烦，默默把虫子挑出来，剩下的继续吃完。","瞬间倒尽胃口，放下筷子结账走人，什么也不说但再也不来了。"]},
+    {q:"领导 / 老师在台上讲完话，问：\u201c大家对这个方案还有什么补充吗？\u201d",opts:["举手抛出自己构思已久的独特见解，享受全场的目光。","如果刚好有特别好的想法，会简短地说两句补充一下。","低头看笔记，心里有想法但也绝对不当出头鸟。","灵魂已经出窍，眼神放空，祈祷千万别点到自己的名字。"]},
+    {q:"玩游戏马上要赢了 / 抢票到了最后支付的1秒钟，屏幕突然卡死跳回桌面：",opts:["瞬间红温！猛砸鼠标/手机，仰天长啸，开始疯狂输出脏话。","深吸一口气，气得胸口疼，在群里发一排抓狂的表情包发泄。","呆坐十秒钟消化一下，叹口气，重新打开软件再试一次。","面无表情，心如止水，甚至觉得\u201c这就是命，不玩/不去了\u201d。"]},
+    {q:"辛辛苦苦敲了两个小时的字（作业/报告），电脑突然蓝屏且完全没保存：",opts:["崩溃大哭或者把键盘砸穿，觉得自己的人生都失去了意义。","在崩溃的边缘游走，疯狂搜索\u201c如何恢复未保存的文档\u201d。","喝口水冷静一下，只能自认倒霉，凭着记忆从头开始写。","甚至笑了出来：\u201c太好了，刚好我觉得刚才写的像依托答辩，重写一版更好。\u201d"]},
+    {q:"楼上邻居连续三天在早上7点准时开始电钻装修，吵得你无法睡觉：",opts:["直接披头散发冲上楼去疯狂敲门，和装修工人疯狂对线。","在物业群里极其阴阳怪气地发长文控诉，并在家里大声咒骂。","翻个身，戴上降噪耳机或者用枕头捂住头，强行继续睡。","觉得这是绝佳的早起闹钟，干脆起床吃个豪华早餐开启新的一天。"]},
+    {q:"排了半个小时的长队，突然有个大妈理直气壮地插队到你正前方：",opts:["毫不留情地当场大声呵斥：\u201c排队去！后面那么多人你眼瞎吗？\u201d","用手拍拍她的肩膀，压着怒火告诉她：\u201c阿姨，大家都在排队。\u201d","在心里翻个白眼，只要她不磨蹭太久，多等一个人就算了。","毫无波澜，甚至还主动给她让出一点空间，权当尊老爱幼了。"]},
+    {q:"点的外卖等了一个小时，打开发现完全送错了，而且是你最讨厌吃的菜：",opts:["立刻打电话把外卖员和商家狂骂一顿，必须重新送并全额退款！","气愤地联系客服申请退款，并在平台上写下长篇差评。","稍微有点郁闷，申请完退款后，去楼下便利店买个泡面凑合吃。","尝了一口觉得好像也能吃，面无表情地把这份讨厌的菜吃完了。"]},
+    {q:"开会/讨论时，别人暗戳戳地把不是你的锅甩到了你头上：",opts:["当场掀桌翻脸，拿出截图和聊天记录逐条怒怼，绝不背锅。","会上忍住没发作，但会后立马发朋友圈或者找人疯狂吐槽对方。","懒得跟他吵，只是平静地跟领导陈述一下真实的时间线和责任。","甚至顺着他的话说\u201c对对对，都是我的错\u201d，像看猴戏一样看着他尴尬。"]},
+    {q:"走在路上毫无防备地一脚踩进了一个深水坑，鞋袜全湿透了：",opts:["站在原地气急败坏地狂跺脚，觉得今天倒霉透顶，一天心情全毁。","郁闷地骂了几句，一路上都在烦躁脚底湿哒哒的黏腻感。","找个有纸巾的地方稍微擦干一下，安慰自己回家换了就行。","低头看了一眼，觉得有点凉快，继续保持原来的步伐若无其事地走。"]},
+    {q:"坐长途大巴或者通勤地铁，没带耳机也没法看手机，你在干嘛？",opts:["在脑子里复盘今天要做的工作清单，或者算算这个月的开销。","观察车厢里的人，猜测他们的职业或者刚才发生了什么事。","盯着窗外倒退的风景，脑子里开始播放各种毫无逻辑的MV画面。","闭上眼睛，脑补如果这辆车突然穿越到异世界，自己该如何带领大家生存。"]},
+    {q:"玩带有一定自由度或开放世界的游戏（比如原神、我的世界），你的首要目标是：",opts:["极其功利地查阅攻略，把资源最大化，追求最高效的升级和通关。","跟着主线任务走，偶尔清理一下支线，稳扎稳打地体验游戏内容。","沉浸在剧情的世界观里，喜欢收集各种奇怪的道具或看风景截图。","根本不管任务，整天研究怎么利用物理引擎把自己卡出地图建抽象违建。"]},
+    {q:"如果有个神秘人毫无条件地给你 5 万块钱，要求你必须花掉，你会：",opts:["存进理财，或者用来报个有用的培训班、买台高配置的生产力电脑。","升级一下自己的衣柜和日常装备，剩下的存起来以备不时之需。","全款拿下一个极其昂贵的绝版手办，或者买一套顶配设备体验虚拟现实。","拿去买一张去南极的单程船票，或者全买成彩票感受一下数字跳动的刺激。"]},
+    {q:"看到一篇标题为\u201c强人工智能将在10年内取代人类90%工作\u201d的文章，你作何反应？",opts:["立刻焦虑地搜索\u201c哪些行业不会被AI取代\u201d，思考自己的就业前景。","觉得专家又在贩卖焦虑，现在的AI连个格式都排不好，继续安稳干饭。","想象一下未来不用上班，每天由机器人投喂的乌托邦生活，竟然有点向往。","开始构思如何伪装成机器人，或者带领人类反抗军摧毁天网服务器的科幻剧本。"]},
+    {q:"跟朋友去玩剧本杀或者密室逃脱，你最享受的环节是：",opts:["盘逻辑、找线索，极其享受把时间线理清、锁定最终凶手的那种掌控感。","配合大家的推理，做好自己角色的本分，争取顺利通关。","沉浸在NPC的表演和场景的氛围里，觉得自己真的成了故事里的人。","各种抽象操作，比如尝试反向审问NPC，或者试图和密室里的假人谈恋爱。"]},
+    {q:"买了一件需要自己组装的复杂家具（比如大柜子），拆开包装后：",opts:["严格把所有零件分类摆好，对照说明书一步都不敢错地开始拼。","边看说明书边拼，遇到不懂的再翻回去仔细看图解。","扫一眼成品图，靠直觉开始大力出奇迹，哪怕最后多出几个螺丝也无所谓。","说明书看都不看，觉得这东西的最终形态为什么不能是一个赛博朋克狗窝？"]},
+    {q:"晚上睡不着，你在床上辗转反侧时，脑子里通常在想什么？",opts:["疯狂懊悔今天哪件事没做好，或者焦虑明天早上的会议/考试该怎么办。","把今天发生的事情像流水账一样过一遍，祈祷快点睡着。","回忆多年前某次吵架没发挥好的场景，并在脑子里重新组织完美的绝杀台词。","脑补出一部长达两小时的史诗级电影，自己是拥有超能力的救世主。"]}
+];
+
+var cowTypes = {
+    "JXWS":{name:"领头牛",judgment:"高情商判词： 你是团队里当之无愧的定海神针。你深谙世俗法则，既有向上攀登的野心，也有脚踏实地的极强执行力。面对压力，你总能情绪稳定地输出高光表现。你的务实与耀眼，正是这个时代最稀缺的领导力，没有你镇场子，这草台班子早散了。"},
+    "JXWC":{name:"天牛",judgment:"高情商判词： 你是自带聚光灯的现实扭曲者。你拥有极其强大的内核，脑子里装满了天马行空的颠覆性创意。你不仅敢想，还能稳扎稳打地把这些超前的宏大叙事付诸实践。别人笑你太疯癫，你只是在降维打击，你是天生的破局者。"},
+    "JXFS":{name:"斗牛",judgment:"高情商判词： 你的生命力犹如一团燃烧的烈火。为了实现目标，你可以爆发出惊人的能量与极高的专注度。虽然红温时的你气场极强让人敬畏，但正是这种\u201c神挡杀神\u201d的极致效率，让你总能在死线前力挽狂澜，你是真正的硬核狠人。"},
+    "JXFC":{name:"红牛",judgment:"高情商判词： 你是这个赛博时代最狂热的灵感缪斯。你不屑于平庸的世俗逻辑，热衷于高调追逐那些常人难以理解的抽象美学。你的精神状态极具感染力，每一次思维跳跃都像一场华丽的风暴。你的存在本身，就是对无聊现实的最强反叛。"},
+    "JYWS":{name:"孺子牛",judgment:"高情商判词： 你是这个喧嚣世界里最不可或缺的承重墙。你从不争抢风头，却总能在最隐秘的角落里，用绝对稳定的情绪把细节做到极致。你的靠谱与低调让你成为所有人最信赖的托底人。大音希声，你是真正用实力说话的无冕之王。"},
+    "JYWC":{name:"牛顿",judgment:"高情商判词： 你是遗世独立的清醒造梦师。你远离无意义的社交喧嚣，在自己的小宇宙里默默深耕颠覆性思维。你不在乎外界的掌声，只想在静谧中完成伟大的构想。这种极其珍贵的专注力与宏大视野，让你注定能创造出惊艳世人的奇迹。"},
+    "JYFS":{name:"牛马",judgment:"高情商判词： 你的灵魂深处藏着一座随时爆发的活火山。你平时内敛沉静，但对认定的目标有着近乎偏执的死磕精神。你能在深夜独自咽下焦虑，哪怕把世界撞个窟窿也要拿到切实的结果。这种隐忍的极致爆发力与抗压性，是你无人能及的绝对底牌。"},
+    "JYFC":{name:"疯牛",judgment:"高情商判词： 你是一个披着低调外衣的浪漫创世神。在别人眼中你或许沉默寡言，但在你波涛汹涌的精神世界里，早已建起了一座绝美的乌托邦。你不需要世俗的浅薄理解，你的才华与狂热只在那些深邃的抽象思考中恣意流淌，闪闪发光。"},
+    "TXWS":{name:"社牛",judgment:"高情商判词： 你是深谙职场生存法则的太极大师。你懂得如何优雅地展示松弛感，拒绝盲目内耗；但同时你又极度聪明务实，该拿的好处一分都不会少。你用最高级的情商和最稳定的情绪，在这个复杂的世界里游刃有余，活得比谁都通透。"},
+    "TXWC":{name:"牛蛙",judgment:"高情商判词： 你是行走的人间清醒与大家的快乐老家。你不仅自己心态极佳，还总能用高级的幽默和绝妙的脑洞化解周围的焦虑。你早就看透了内卷的虚无，选择用最高调的乐子人姿态嘲解这骨感的现实，你是真正的精神治疗师。"},
+    "TXFS":{name:"牛皮糖",judgment:"高情商判词： 你是目标导向的究极生存专家。为了拿到实质性的结果，你拥有极其可怕的心理弹性和抗挫折能力。你不在乎虚荣的面子，该发力时雷厉风行，该借力时身段柔软。\u201c只要我不尴尬，世界就是我的\u201d，这是你战无不胜的最强软实力。"},
+    "TXFC":{name:"野牛",judgment:"高情商判词： 你是打破一切常规的自由之风。世俗的条条框框对你而言毫无意义。你毫无思想包袱，勇敢高调，满脑子都是离经叛道的绝妙灵感。你走到哪里，就把纯粹的欢乐与活力带到哪里，没有人能定义你，因为你永远在超越定义的路上。"},
+    "TYWS":{name:"犀牛",judgment:"高情商判词： 你拥有全图鉴中最坚不可摧的精神装甲。你主动切断了无效的外部干扰，关掉了对焦虑的感知，在自己的天地里过得踏实且从容。任凭风浪起，稳坐钓鱼台。你这种\u201c水火不侵\u201d的极致钝感力，是现代社会多少人求之不得的终极天赋。"},
+    "TYWC":{name:"海牛",judgment:"高情商判词： 你是已经完成精神飞升的当代哲学家。世俗的烦恼早已无法触碰你的灵魂，你选择在自己极其丰富、广袤的精神汪洋中自由漂浮。那些喧嚣与内卷在你看来不过是过眼云烟，你那份与世无争的极致岁月静好，代表着最高维度的生存智慧。"},
+    "TYFS":{name:"蜗牛",judgment:"高情商判词： 你是背负着沉重现实却依然前行的孤勇者。虽然你经常在拖延与内耗的泥潭里挣扎，但每次死线降临，你都能在最后一秒爆发出惊人的极限潜能死里逃生。你承受着常人难以想象的精神重压依然没有崩溃，你的韧性让人心生敬佩。"},
+    "TYFC":{name:"蘑菇牛",judgment:"高情商判词： 你是超越了人类范畴的终极幻想主宰。你彻底抛弃了骨感乏味的现实，在无人打扰的角落里，用极其宏大且致幻的想象力构建了一个色彩斑斓的异世界。你已经和你的精神乌托邦融为一体，你是那个高维空间里绝对的神明。"}
+};
+
+var shadowNames = ["领头牛","天牛","斗牛","红牛","孺子牛","牛顿","牛马","疯牛","社牛","牛蛙","牛皮糖","野牛","犀牛","海牛","蜗牛","蘑菇牛"];
+
+var answers = {};
+var totalQuestions = 28;
+
+function buildQuestions() {
+    var container = document.getElementById("questions-container");
+    var html = "";
+    for (var i = 0; i < questions.length; i++) {
+        var q = questions[i];
+        html += '<div class="question-card" id="qcard-' + i + '">';
+        html += '<div class="q-text"><span class="q-number">' + (i + 1) + '</span>' + q.q + '</div>';
+        html += '<div class="options">';
+        var labels = ["A","B","C","D"];
+        for (var j = 0; j < q.opts.length; j++) {
+            html += '<div class="option" data-q="' + i + '" data-o="' + j + '" onclick="selectOption(' + i + ',' + j + ')">';
+            html += '<span class="opt-label">' + labels[j] + '</span>';
+            html += '<span>' + q.opts[j] + '</span>';
+            html += '</div>';
+        }
+        html += '</div></div>';
+    }
+    container.innerHTML = html;
+}
+
+function selectOption(qIdx, oIdx) {
+    answers[qIdx] = oIdx;
+    var opts = document.querySelectorAll('.option[data-q="' + qIdx + '"]');
+    for (var i = 0; i < opts.length; i++) {
+        opts[i].classList.remove('selected');
+    }
+    var selected = document.querySelector('.option[data-q="' + qIdx + '"][data-o="' + oIdx + '"]');
+    if (selected) selected.classList.add('selected');
+    updateProgress();
+    document.getElementById("unanswered-warning").style.display = "none";
+}
+
+function updateProgress() {
+    var answered = Object.keys(answers).length;
+    var pct = (answered / totalQuestions) * 100;
+    document.getElementById("progress-bar").style.width = pct + "%";
+}
+
+function startQuiz() {
+    showSection("quiz");
+    document.getElementById("progress-bar-container").style.display = "block";
+    window.scrollTo(0, 0);
+}
+
+function submitQuiz() {
+    if (Object.keys(answers).length < totalQuestions) {
+        document.getElementById("unanswered-warning").style.display = "block";
+        var firstUnanswered = -1;
+        for (var i = 0; i < totalQuestions; i++) {
+            if (answers[i] === undefined) {
+                firstUnanswered = i;
+                break;
+            }
+        }
+        if (firstUnanswered >= 0) {
+            var card = document.getElementById("qcard-" + firstUnanswered);
+            if (card) card.scrollIntoView({behavior:"smooth", block:"center"});
+        }
+        return;
+    }
+
+    var scores = {J:0, T:0, X:0, Y:0, F:0, W:0, S:0, C:0};
+
+    for (var i = 0; i < 28; i++) {
+        var opt = answers[i];
+        var dim, side, pts;
+        if (i < 7) dim = "JT";
+        else if (i < 14) dim = "XY";
+        else if (i < 21) dim = "FW";
+        else dim = "SC";
+
+        if (opt === 0) { side = dim[0]; pts = 21; }
+        else if (opt === 1) { side = dim[0]; pts = 11; }
+        else if (opt === 2) { side = dim[1]; pts = 11; }
+        else { side = dim[1]; pts = 21; }
+
+        scores[side] += pts;
+    }
+
+    var code = "";
+    code += (scores.J >= scores.T) ? "J" : "T";
+    code += (scores.X >= scores.Y) ? "X" : "Y";
+    code += (scores.F >= scores.W) ? "F" : "W";
+    code += (scores.S >= scores.C) ? "S" : "C";
+
+    var cow = cowTypes[code];
+    document.getElementById("result-code").textContent = code;
+    document.getElementById("result-name").textContent = cow.name;
+    document.getElementById("result-image").src = "image/True/" + cow.name + ".png";
+    document.getElementById("result-image").alt = cow.name;
+    document.getElementById("result-judgment").textContent = cow.judgment;
+
+    document.getElementById("progress-bar-container").style.display = "none";
+    showSection("result");
+    window.scrollTo(0, 0);
+}
+
+function showSection(id) {
+    var sections = document.querySelectorAll(".section");
+    for (var i = 0; i < sections.length; i++) {
+        sections[i].classList.remove("active");
+    }
+    document.getElementById(id).classList.add("active");
+    window.scrollTo(0, 0);
+}
+
+function resetQuiz() {
+    answers = {};
+    document.getElementById("progress-bar").style.width = "0%";
+    document.getElementById("progress-bar-container").style.display = "none";
+    document.getElementById("unanswered-warning").style.display = "none";
+    var opts = document.querySelectorAll('.option.selected');
+    for (var i = 0; i < opts.length; i++) {
+        opts[i].classList.remove('selected');
+    }
+    var flipped = document.querySelectorAll('.gallery-item.flipped');
+    for (var i = 0; i < flipped.length; i++) {
+        flipped[i].classList.remove('flipped');
+    }
+    showSection("intro");
+    window.scrollTo(0, 0);
+}
+
+function flipGalleryItem(el) {
+    el.classList.toggle('flipped');
+}
+
+function buildGallery() {
+    var grid = document.getElementById("gallery-grid");
+    var html = "";
+    for (var i = 0; i < shadowNames.length; i++) {
+        html += '<div class="gallery-item" onclick="flipGalleryItem(this)">';
+        html += '<div class="gallery-item-inner">';
+        html += '<div class="gallery-item-front">';
+        html += '<img src="image/Shadow/' + shadowNames[i] + '.png" alt="' + shadowNames[i] + '">';
+        html += '<div class="gallery-question">？？？</div>';
+        html += '</div>';
+        html += '<div class="gallery-item-back">';
+        html += '<img src="image/True/' + shadowNames[i] + '.png" alt="' + shadowNames[i] + '">';
+        html += '<div class="gallery-name">' + shadowNames[i] + '</div>';
+        html += '</div>';
+        html += '</div></div>';
+    }
+    grid.innerHTML = html;
+}
+
+buildQuestions();
+buildGallery();
+</script>
+
+</body>
+</html>
